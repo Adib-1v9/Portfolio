@@ -7,6 +7,7 @@ import { DOCK_GROUPS, type DockApp } from "@/lib/apps";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { useWindows } from "@/components/windows/WindowProvider";
 import { useDockIcons } from "@/components/windows/DockIcons";
+import { ProjectIcon } from "@/components/apps/ProjectIcon";
 
 // Pastille de notif iOS : cercle rouge net qui pulse pour attirer l'œil (cf. maquette).
 function Notif({ count }: { count: number }) {
@@ -60,7 +61,17 @@ function DockItem({
             alt=""
             width={56}
             height={56}
+            loading="eager"
             className="h-14 w-14 drop-shadow-[0_8px_18px_rgba(0,0,0,.5)]"
+          />
+        ) : app.icon ? (
+          // Fond plein coloré + glyphe blanc, identique à l'en-tête de la fenêtre (source : apps.ts).
+          <ProjectIcon
+            icon={app.icon}
+            color={app.color ?? "#cdd2dd"}
+            fill
+            box="h-14 w-14 rounded-[15px] shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_8px_18px_-8px_rgba(0,0,0,.7)]"
+            glyph="h-[30px] w-[30px]"
           />
         ) : (
           <div

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "capture": "python3 -m http.server 4321 --directory tools"
   },
   "dependencies": {
     "@fontsource-variable/cascadia-code": "^5.2.2",

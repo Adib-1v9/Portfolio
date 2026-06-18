@@ -7,9 +7,10 @@ import type { GlyphKey } from "@/lib/projectGlyphs";
 export type DockApp = {
   id: string;
   labelKey: MessageKey;
-  glyph?: string; // caractère/emoji affiché (si pas d'image)
-  color?: string; // fond de l'icône (si pas d'image)
-  image?: string; // chemin d'une vraie icône (prioritaire sur glyph)
+  icon?: GlyphKey; // picto Phosphor (squircle graphite) — MÊME icône au dock et dans la fenêtre
+  glyph?: string; // caractère/emoji affiché (repli, ex. Terminal ">_")
+  color?: string; // teinte du glyphe (icon) ou fond (glyph caractère)
+  image?: string; // chemin d'une vraie icône (prioritaire)
   mono?: boolean; // true = glyph rendu en plus petit (style ">_")
   opensWindow?: boolean; // true = un clic ouvre une fenêtre (sinon icône inerte)
   badge?: number; // pastille de notification (ex. Finder = 10 projets)
@@ -17,8 +18,7 @@ export type DockApp = {
 
 // Icône bureau = un projet → son nom est un nom propre, JAMAIS traduit (label littéral).
 // icon = picto Phosphor inliné, color = sa teinte. La position n'est PAS stockée : elle est
-// calculée en cercle autour du centre (cf. desktopRingPositions) → toujours équilibrée quel
-// que soit le nombre d'icônes. Non déplaçables.
+// éparpillée (cf. desktopScatterPositions) pour un bureau vivant. Non déplaçables.
 export type DesktopIcon = {
   id: string;
   label: string;
@@ -41,9 +41,11 @@ const TERMINAL: DockApp = {
   color: "#16181E",
   mono: true,
 };
-const ABOUT: DockApp = { id: "apropos", labelKey: "app.about", glyph: "i", color: "#FF9F0A", opensWindow: true };
-const CV: DockApp = { id: "cv", labelKey: "app.cv", glyph: "▢", color: "#FF453A", opensWindow: true };
-const CONTACT: DockApp = { id: "contact", labelKey: "app.contact", glyph: "@", color: "#34C7DE", opensWindow: true };
+// Icône = MÊME picto Phosphor que l'en-tête de la fenêtre (cf. registry.tsx qui dérive d'ici) ;
+// color = teinte du glyphe sur le squircle graphite, comme les projets.
+const ABOUT: DockApp = { id: "apropos", labelKey: "app.about", icon: "user", color: "#FF9F0A", opensWindow: true };
+const CV: DockApp = { id: "cv", labelKey: "app.cv", icon: "file-text", color: "#FF453A", opensWindow: true };
+const CONTACT: DockApp = { id: "contact", labelKey: "app.contact", icon: "envelope", color: "#34C7DE", opensWindow: true };
 
 // Disposition du dock (Option A) : Finder ancré à gauche | apps « moi » | Terminal isolé.
 // Chaque sous-tableau = un groupe ; un séparateur est rendu entre les groupes.
@@ -58,28 +60,29 @@ export function findApp(id: string): DockApp | undefined {
 
 // Vitrine du bureau : les projets phares, chacun visuellement distinct. Non cliquables pour
 // l'instant (la cliquabilité viendra ensuite). L'ordre fixe l'angle de chacun sur le cercle.
-export const DESKTOP_ICONS: DesktopIcon[] = [
-  { id: "gachanime", label: "Gachanime", icon: "dice-five", color: "#3B9EFF" },
-  { id: "starbucks-legacy", label: "Starbucks Legacy", icon: "coffee", color: "#00B873" },
-  { id: "spotify-stats", label: "Spotify Stats", icon: "chart-bar", color: "#1ED760" },
-  { id: "sagwa-bot", label: "sagwa-bot", icon: "robot", color: "#8C8AFF" },
+// Projets mis en avant sur le bureau (sous-ensemble curé du catalogue). On les DÉRIVE de
+// PROJECTS → l'icône et la couleur sont strictement les mêmes qu'au Finder (source unique).
+const FEATURED_DESKTOP_IDS = ["gachanime", "starbucks-legacy", "spotify-stats", "sagwa-bot"];
+
+export const DESKTOP_ICONS: DesktopIcon[] = FEATURED_DESKTOP_IDS.map((id) => {
+  const p = PROJECTS.find((proj) => proj.id === id);
+  if (!p) throw new Error(`DESKTOP_ICONS: projet inconnu "${id}"`);
+  return { id: p.id, label: p.name, icon: p.icon, color: p.color };
+});
+
+// Positions « éparpillées » des icônes du bureau : un scatter volontairement asymétrique pour
+// rendre le bureau vivant (≠ cercle géométrique, ≠ colonne alignée). Pool d'ancres curées
+// (% du viewport, coin haut-gauche de la boîte de 96px) ; on prend les `count` premières.
+// Choisies pour éviter la menubar (haut), le dock (bas-centre) et le centre (fenêtre d'accueil).
+const SCATTER_ANCHORS = [
+  { x: 11, y: 21 },
+  { x: 79, y: 17 },
+  { x: 63, y: 60 },
+  { x: 17, y: 66 },
+  { x: 85, y: 46 },
+  { x: 37, y: 28 },
 ];
 
-// Dispose `count` icônes en cercle autour du centre (milieu laissé libre pour la future fenêtre
-// d'accueil). Coordonnées = % du viewport (coin haut-gauche de la boîte de 96px).
-// - ry (rayon vertical) grandit avec le nombre d'icônes → cercle « plus ou moins grand ».
-// - rx ≈ 0.6·ry compense l'écran plus large que haut → rendu visuellement circulaire (pas ovale).
-// - premier élément placé en haut (-90°), puis répartition régulière dans le sens horaire.
-export function desktopRingPositions(count: number): { x: number; y: number }[] {
-  const cx = 43;
-  const cy = 40;
-  const ry = 16 + count * 2;
-  const rx = ry * 0.6;
-  return Array.from({ length: count }, (_, i) => {
-    const a = ((-90 + (360 / count) * i) * Math.PI) / 180;
-    return {
-      x: +(cx + rx * Math.cos(a)).toFixed(1),
-      y: +(cy + ry * Math.sin(a)).toFixed(1),
-    };
-  });
+export function desktopScatterPositions(count: number): { x: number; y: number }[] {
+  return SCATTER_ANCHORS.slice(0, count);
 }

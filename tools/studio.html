@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Studio de capture — adib.os</title>
+<style>
+  :root { --bg:#0d0f15; --panel:#161a22; --line:rgba(255,255,255,.1); --txt:#e6e9f0; --muted:#8b93a7; --accent:#2E8BFF; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif; background:var(--bg); color:var(--txt); }
+  .wrap { max-width:1100px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 22px; }
+  .stage { position:relative; width:100%; max-width:620px; margin:0 auto; aspect-ratio:1716/1672; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:radial-gradient(120% 120% at 30% 10%,#1b2030,#0d0f15 70%); display:grid; place-items:center; }
+  canvas { display:block; width:100%; height:100%; }
+  .empty { position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); font-family:ui-monospace,monospace; font-size:12px; pointer-events:none; padding:0 30px; text-align:center; }
+  /* repère du cadre, purement visuel */
+  .framehint { position:absolute; inset:0; border:1px dashed rgba(255,255,255,.12); border-radius:12px; pointer-events:none; }
+  .badge { position:absolute; top:10px; left:10px; font-family:ui-monospace,monospace; font-size:11px; color:var(--txt); background:rgba(0,0,0,.55); border:1px solid var(--line); border-radius:7px; padding:4px 9px; pointer-events:none; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:18px; }
+  button { font:inherit; font-weight:600; color:#fff; background:var(--accent); border:0; border-radius:10px; padding:10px 16px; cursor:pointer; }
+  button.ghost { background:rgba(255,255,255,.06); border:1px solid var(--line); color:var(--txt); }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  label.ctrl { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); min-width:150px; }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  input[type=text] { font:inherit; background:#0b0d12; border:1px solid var(--line); color:var(--txt); border-radius:8px; padding:8px 10px; }
+  .out { margin-top:16px; padding:14px 16px; border:1px solid var(--line); border-radius:10px; background:var(--panel); font-family:ui-monospace,monospace; font-size:12.5px; color:var(--muted); }
+  .out b { color:var(--txt); }
+  code { background:#0b0d12; padding:1px 6px; border-radius:5px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin-top:18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Studio de capture</h1>
+  <p class="sub">Filme une fenêtre ou un écran, cadre dans la zone exacte du carrousel (format quasi carré), exporte une WebP <b>1716×1672</b> déjà compressée. Aucun redimensionnement ensuite.</p>
+
+  <div class="stage">
+    <canvas id="cv" width="1716" height="1672"></canvas>
+    <div class="badge">Aperçu = fichier final · 1716×1672</div>
+    <div class="empty" id="empty">Clique « Choisir une source », puis dans la boîte du navigateur choisis l'onglet « Fenêtre » et sélectionne ton appli. Seul ce cadre sera enregistré, pas tout l'écran.</div>
+    <div class="framehint"></div>
+  </div>
+
+  <div class="row">
+    <button id="pick">Choisir une source</button>
+    <button id="capture" class="ghost" disabled>Capturer la WebP</button>
+    <button id="reset" class="ghost" disabled>Recadrer (reset)</button>
+  </div>
+
+  <div class="grid">
+    <label class="ctrl">Zoom <input id="zoom" type="range" min="0.3" max="3" step="0.01" value="1" disabled></label>
+    <label class="ctrl">Position horizontale <input id="panx" type="range" min="-1" max="1" step="0.01" value="0" disabled></label>
+    <label class="ctrl">Position verticale <input id="pany" type="range" min="-1" max="1" step="0.01" value="0" disabled></label>
+    <label class="ctrl">Qualité (poids) <input id="q" type="range" min="0.4" max="1" step="0.01" value="0.92"></label>
+    <label class="ctrl">Nom du fichier <input id="fname" type="text" value="projet-1"></label>
+  </div>
+
+  <div class="out" id="out">
+    Le fichier se télécharge dans ton dossier de téléchargements. Déplace-le ensuite dans
+    <code>public/shots/</code>, puis ajoute <code>shots: ["/shots/&lt;nom&gt;.webp", …]</code> à ton projet dans <code>src/lib/projects.ts</code>.
+  </div>
+</div>
+
+<video id="vid" autoplay muted playsinline style="display:none"></video>
+
+<script>
+const TARGET_W = 1716, TARGET_H = 1672; // ~1:1, format de la zone d'aperçu (~1.027), résolution ×1.5 pour la netteté (retina / plein écran)
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const vid = document.getElementById('vid');
+const els = {
+  pick: document.getElementById('pick'), capture: document.getElementById('capture'),
+  reset: document.getElementById('reset'), zoom: document.getElementById('zoom'),
+  panx: document.getElementById('panx'), pany: document.getElementById('pany'),
+  q: document.getElementById('q'), fname: document.getElementById('fname'),
+  empty: document.getElementById('empty'), out: document.getElementById('out'),
+};
+let stream = null, raf = 0;
+
+function enableControls(on) {
+  ['capture','reset','zoom','panx','pany'].forEach(k => els[k].disabled = !on);
+}
+
+async function pick() {
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false });
+    vid.srcObject = stream;
+    await vid.play();
+    els.empty.style.display = 'none';
+    enableControls(true);
+    stream.getVideoTracks()[0].addEventListener('ended', stop);
+    loop();
+  } catch (e) {
+    els.out.textContent = 'Capture annulée ou refusée : ' + (e && e.message ? e.message : e);
+  }
+}
+
+function stop() {
+  if (raf) cancelAnimationFrame(raf), raf = 0;
+  if (stream) stream.getTracks().forEach(t => t.stop()), stream = null;
+  enableControls(false);
+  els.empty.style.display = 'grid';
+}
+
+function draw() {
+  const vw = vid.videoWidth, vh = vid.videoHeight;
+  if (!vw || !vh) return;
+  // base = "cover" (remplit pile le 16:9 sans bande vide), puis multiplié par le zoom
+  const base = Math.max(TARGET_W / vw, TARGET_H / vh);
+  const scale = base * parseFloat(els.zoom.value);
+  const dw = vw * scale, dh = vh * scale;
+  const overX = dw - TARGET_W, overY = dh - TARGET_H;
+  const dx = (TARGET_W - dw) / 2 + parseFloat(els.panx.value) * (overX / 2);
+  const dy = (TARGET_H - dh) / 2 + parseFloat(els.pany.value) * (overY / 2);
+  ctx.fillStyle = '#0d0f15';
+  ctx.fillRect(0, 0, TARGET_W, TARGET_H);
+  ctx.drawImage(vid, dx, dy, dw, dh);
+}
+
+function loop() { draw(); raf = requestAnimationFrame(loop); }
+
+function capture() {
+  draw();
+  const q = parseFloat(els.q.value);
+  cv.toBlob((blob) => {
+    if (!blob) { els.out.textContent = 'Échec de l’export WebP.'; return; }
+    const name = (els.fname.value.trim() || 'capture').replace(/\.webp$/i, '') + '.webp';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    const kb = (blob.size / 1024).toFixed(0);
+    const b = document.createElement('b'); b.textContent = name;
+    const c1 = document.createElement('code'); c1.textContent = 'public/shots/';
+    const c2 = document.createElement('code'); c2.textContent = 'projects.ts';
+    els.out.replaceChildren(
+      b, ' exporté — ' + TARGET_W + '×' + TARGET_H + ', ' + kb + ' Ko. Déplace-le dans ',
+      c1, ' et référence-le dans ', c2, '.'
+    );
+  }, 'image/webp', q);
+}
+
+function reset() { els.zoom.value = 1; els.panx.value = 0; els.pany.value = 0; }
+
+els.pick.addEventListener('click', pick);
+els.capture.addEventListener('click', capture);
+els.reset.addEventListener('click', reset);
+// canvas vide stylé au départ
+ctx.fillStyle = '#11141c'; ctx.fillRect(0, 0, TARGET_W, TARGET_H);
+</script>
+</body>
+</html>

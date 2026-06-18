@@ -1,22 +1,25 @@
 "use client";
 
 // Intérieur du Finder : catalogue 3 colonnes (catégories | liste | aperçu), repris de la
-// maquette validée. Filtrage par catégorie + sélection pour l'aperçu. « Lancer » est inerte
-// tant qu'aucune app n'est jouable dans l'OS ; « Voir le code » ouvre le repo public.
+// maquette validée. Filtrage par catégorie + sélection pour l'aperçu. Le bouton « Voir plus »
+// ouvre la fenêtre du projet (la même qu'au double-clic de son icône sur le bureau).
 import { useState } from "react";
 import { useI18n } from "@/components/i18n/LanguageProvider";
+import { useWindows } from "@/components/windows/WindowProvider";
 import {
   CATEGORY_LABEL,
   PROJECTS,
+  projectWindowId,
   type ProjectCategory,
 } from "@/lib/projects";
 import { COLORS } from "@/lib/theme";
+import { ProjectIcon } from "./ProjectIcon";
 
 type Filter = "all" | ProjectCategory;
 
 const CATEGORIES: { id: Filter; dot: string }[] = [
-  { id: "all", dot: COLORS.accentBlue },
-  { id: "games", dot: COLORS.accentGreen },
+  { id: "all", dot: "#FFFFFF" }, // blanc : neutre, libère le bleu pour les Jeux
+  { id: "games", dot: COLORS.accentBlue }, // bleu (ex-couleur de « Tout »), distinct du Web (vert)
   { id: "bots", dot: COLORS.accentOrange },
   { id: "web", dot: "#1DB954" },
   { id: "ext", dot: COLORS.accentRed },
@@ -24,6 +27,7 @@ const CATEGORIES: { id: Filter; dot: string }[] = [
 
 export function FinderApp() {
   const { t } = useI18n();
+  const { open } = useWindows();
   const [filter, setFilter] = useState<Filter>("all");
   const [selectedId, setSelectedId] = useState<string>(PROJECTS[0].id);
 
@@ -68,12 +72,12 @@ export function FinderApp() {
               p.id === selected.id ? "bg-[#2E8BFF]/[0.13]" : ""
             }`}
           >
-            <span
-              className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[9px] font-mono text-[14px] font-bold text-white"
-              style={{ background: p.color }}
-            >
-              {p.glyph}
-            </span>
+            <ProjectIcon
+              icon={p.icon}
+              color={p.color}
+              box="h-[34px] w-[34px] rounded-[10px]"
+              glyph="h-[18px] w-[18px]"
+            />
             <span className="min-w-0">
               <b className="block truncate text-[13.5px] font-semibold text-[#eef1f7]">
                 {p.name}
@@ -87,12 +91,12 @@ export function FinderApp() {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col p-[22px]">
-        <span
-          className="mb-3.5 flex h-[74px] w-[74px] items-center justify-center rounded-[18px] font-mono text-[30px] font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,.28)]"
-          style={{ background: selected.color }}
-        >
-          {selected.glyph}
-        </span>
+        <ProjectIcon
+          icon={selected.icon}
+          color={selected.color}
+          box="mb-3.5 h-[74px] w-[74px] rounded-[18px]"
+          glyph="h-[36px] w-[36px]"
+        />
         <h3 className="mb-1.5 text-[22px] font-extrabold text-white">
           {selected.name}
         </h3>
@@ -100,26 +104,16 @@ export function FinderApp() {
           {label(selected.category)}
         </div>
         <p className="mb-4 text-[13px] leading-[1.6] text-[#aab2c3]">
-          {t("app.placeholder")}
+          {t(selected.descKey)}
         </p>
-        <div className="mt-auto flex gap-2.5">
+        <div className="mt-auto">
           <button
             type="button"
-            disabled={!selected.launchable}
-            className="inline-flex items-center gap-2 rounded-[10px] bg-[#30D158] px-4 py-2.5 font-mono text-[13px] font-bold text-[#06210f] disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={() => open(projectWindowId(selected.id))}
+            className="inline-flex items-center gap-2 rounded-[10px] bg-[#2E8BFF] px-5 py-2.5 font-mono text-[13px] font-bold text-white"
           >
-            ▶ {t("finder.launch")}
+            {t("finder.more")}
           </button>
-          {selected.repoUrl && (
-            <a
-              href={selected.repoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-[10px] border border-white/15 px-4 py-2.5 font-mono text-[13px] font-semibold text-[#cdd2dd]"
-            >
-              {t("finder.viewCode")}
-            </a>
-          )}
         </div>
       </div>
     </div>
