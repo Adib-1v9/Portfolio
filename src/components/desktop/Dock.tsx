@@ -49,7 +49,10 @@ function DockItem({
       type="button"
       onClick={onActivate}
       className="text-center"
-      style={{ cursor: interactive ? "pointer" : "default" }}
+      // `data-cursor="default"` quand non-cliquable → bascule sur le curseur par défaut
+      // (flèche) au lieu du pointer naturel des <button>. Inline `style.cursor` évité car
+      // sa spécificité max écrase les curseurs custom du pack actif (cf. globals.css).
+      data-cursor={interactive ? undefined : "default"}
       whileHover={{ y: -8, scale: 1.08 }}
       transition={{ type: "spring", stiffness: 400, damping: 22 }}
     >

@@ -43,7 +43,9 @@ export default async function RootLayout({
       dir={localeDir(locale)}
       className={`${hanken.variable} ${cascadia.variable} h-full antialiased`}
     >
-      <body className="h-full">
+      {/* `cursor-pack-macos` = pack par défaut. Le système d'easter eggs (à venir) remplacera
+          cette classe par celle d'un autre pack — cf. globals.css pour le pattern. */}
+      <body className="h-full cursor-pack-macos">
         <LanguageProvider initialLocale={locale}>{children}</LanguageProvider>
       </body>
     </html>

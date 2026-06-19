@@ -2,8 +2,9 @@
 
 // Fenêtre Contact : à droite, des cartes cliquables (logos Phosphor) plutôt qu'une capture.
 // Chaque carte = une action principale à gauche (ouvrir le lien) + un bouton « copier » à droite.
-// GitHub + Email ouvrent directement ; LinkedIn est affiché mais inactif (pas encore de compte) ;
-// Discord n'a pas de profil public → seule la copie du pseudo a du sens.
+// GitHub ouvre son profil ; Email ouvre directement le compose Gmail web (pas de mailto: qui
+// échoue sans client mail natif configuré). LinkedIn est affiché mais inactif (pas encore de
+// compte) ; Discord n'a pas de profil public → seule la copie du pseudo a du sens.
 import { useState } from "react";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { ProjectGlyph } from "@/components/desktop/ProjectGlyph";
@@ -14,6 +15,9 @@ import { AppShell } from "./AppShell";
 const GITHUB_URL = "https://github.com/Adib-1v9";
 const EMAIL = "amrani.adibr@gmail.com";
 const DISCORD_PSEUDO = "neyshen";
+// Gmail compose web : ouvre un brouillon pré-rempli en destinataire, sans dépendre d'un client
+// mail système. Suppose le visiteur connecté à un compte Google (cas majoritaire).
+const GMAIL_COMPOSE = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL)}`;
 
 const CARD =
   "flex items-center gap-2 rounded-[12px] border border-white/10 bg-white/[0.05] px-[12px] py-[11px]";
@@ -89,7 +93,12 @@ function ContactPreview() {
         </div>
 
         <div className={CARD}>
-          <a href={`mailto:${EMAIL}`} className={`${MAIN} hover:opacity-80`}>
+          <a
+            href={GMAIL_COMPOSE}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${MAIN} hover:opacity-80`}
+          >
             <Badge glyph="envelope" bg="#2E8BFF" fg="#ffffff" />
             <Texts label="Email" sub={EMAIL} />
           </a>
@@ -128,6 +137,7 @@ export function ContactApp() {
       color={app.color}
       name={t("app.contact")}
       fill
+      descKey="contact.intro"
       preview={<ContactPreview />}
     />
   );

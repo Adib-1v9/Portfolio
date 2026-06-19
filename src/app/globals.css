@@ -21,6 +21,53 @@ body {
   overflow: hidden; /* le bureau ne scrolle pas */
 }
 
+/* Curseurs personnalisés — système multi-pack pour préparer des easter eggs.
+   Chaque pack = un bloc CSS scopé par `body.cursor-pack-<nom>` qui surcharge le défaut.
+   Pour ajouter un nouveau pack : (1) crée `public/cursors/<nom>/{default,pointer,text}.png`
+   avec ses hotspots, (2) duplique le bloc ci-dessous en remplaçant `macos` par `<nom>`,
+   (3) bascule la classe sur `<body>` via JS. La déclaration vient APRÈS @import pour
+   gagner sur le preflight Tailwind (même spécificité, dernière règle gagne).
+   Pack par défaut posé sur `<body>` dans `layout.tsx`. */
+
+/* Pack macOS — extraits du repo antiden, frame 32×32 de chaque .cur,
+   hotspots lus dans les headers binaires. */
+body.cursor-pack-macos {
+  cursor: url("/cursors/macos/default.png") 1 0, default;
+}
+body.cursor-pack-macos a,
+body.cursor-pack-macos button,
+body.cursor-pack-macos [role="button"],
+body.cursor-pack-macos summary,
+body.cursor-pack-macos label[for],
+body.cursor-pack-macos .cursor-pointer,
+body.cursor-pack-macos [data-cursor="pointer"] {
+  cursor: url("/cursors/macos/pointer.png") 2 2, pointer;
+}
+body.cursor-pack-macos input,
+body.cursor-pack-macos textarea,
+body.cursor-pack-macos select,
+body.cursor-pack-macos [contenteditable="true"],
+body.cursor-pack-macos .cursor-text,
+body.cursor-pack-macos [data-cursor="text"] {
+  cursor: url("/cursors/macos/text.png") 16 16, text;
+}
+/* Utilities Tailwind `cursor-default` / `cursor-grab` / `active:cursor-grabbing` doivent
+   aussi piocher dans le pack, sinon elles repassent au curseur natif Windows à ces endroits
+   (icônes du bureau, titlebar des fenêtres, items non-cliquables du dock). Le sélecteur
+   `[class*="cursor-grabbing"]` couvre la variante préfixée Tailwind (`active:cursor-grabbing`
+   → classe `active\:cursor-grabbing`) sans avoir à échapper les `:` dans le sélecteur CSS. */
+body.cursor-pack-macos .cursor-default,
+body.cursor-pack-macos [data-cursor="default"] {
+  cursor: url("/cursors/macos/default.png") 1 0, default;
+}
+body.cursor-pack-macos .cursor-grab {
+  cursor: url("/cursors/macos/grab.png") 2 2, grab;
+}
+body.cursor-pack-macos .cursor-grab:active,
+body.cursor-pack-macos [class*="cursor-grabbing"]:active {
+  cursor: url("/cursors/macos/grabbing.png") 2 0, grabbing;
+}
+
 /* Pulsation de la notif du Finder : attire l'œil sans bouger l'icône (cf. maquette). */
 @keyframes notifBlink {
   0%,
