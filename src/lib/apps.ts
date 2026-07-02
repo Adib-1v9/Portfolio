@@ -34,12 +34,12 @@ const FINDER: DockApp = {
   badge: PROJECTS.length, // la pastille reflète le nombre réel de projets du catalogue
 };
 const TERMINAL: DockApp = {
-  // Inerte jusqu'à l'itération 3 (terminal scripté) → pas de opensWindow.
   id: "terminal",
   labelKey: "app.terminal",
   glyph: ">_",
   color: "#16181E",
   mono: true,
+  opensWindow: true,
 };
 // Icône = MÊME picto Phosphor que l'en-tête de la fenêtre (cf. registry.tsx qui dérive d'ici) ;
 // color = teinte du glyphe sur le squircle graphite, comme les projets.

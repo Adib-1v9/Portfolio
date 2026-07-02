@@ -7,6 +7,7 @@ import type { MessageKey } from "@/lib/i18n";
 import { AppShell } from "./AppShell";
 import { FinderApp } from "./FinderApp";
 import { ContactApp } from "./ContactApp";
+import { TerminalApp } from "./TerminalApp";
 
 export type AppEntry = { titleKey: MessageKey; Component: ComponentType };
 
@@ -42,4 +43,5 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
   apropos: { titleKey: "app.about", Component: systemApp("apropos", "apropos.intro") },
   cv: { titleKey: "app.cv", Component: systemApp("cv", "cv.intro") },
   contact: { titleKey: "app.contact", Component: ContactApp },
+  terminal: { titleKey: "app.terminal", Component: TerminalApp },
 };
