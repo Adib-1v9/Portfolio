@@ -2,9 +2,9 @@
 
 // Fenêtre Contact : à droite, des cartes cliquables (logos Phosphor) plutôt qu'une capture.
 // Chaque carte = une action principale à gauche (ouvrir le lien) + un bouton « copier » à droite.
-// GitHub ouvre son profil ; Email ouvre directement le compose Gmail web (pas de mailto: qui
-// échoue sans client mail natif configuré). LinkedIn est affiché mais inactif (pas encore de
-// compte) ; Discord n'a pas de profil public → seule la copie du pseudo a du sens.
+// GitHub et LinkedIn ouvrent leur profil ; Email ouvre directement le compose Gmail web (pas de
+// mailto: qui échoue sans client mail natif configuré) ; Discord n'a pas de profil public → seule
+// la copie du pseudo a du sens.
 import { useState } from "react";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { ProjectGlyph } from "@/components/desktop/ProjectGlyph";
@@ -13,6 +13,7 @@ import { findApp } from "@/lib/apps";
 import { AppShell } from "./AppShell";
 
 const GITHUB_URL = "https://github.com/Adib-1v9";
+const LINKEDIN_URL = "https://www.linkedin.com/in/adib-amrani/";
 const EMAIL = "amrani.adibr@gmail.com";
 const DISCORD_PSEUDO = "neyshen";
 // Gmail compose web : ouvre un brouillon pré-rempli en destinataire, sans dépendre d'un client
@@ -75,7 +76,6 @@ function CopyButton({ value }: { value?: string }) {
 }
 
 function ContactPreview() {
-  const { t } = useI18n();
   return (
     <div className="flex h-full w-full items-center justify-center rounded-[12px] border border-white/[0.08] p-6 [background:radial-gradient(120%_120%_at_30%_10%,#1b2030,#0d0f15_70%)]">
       <div className="flex w-full max-w-[330px] flex-col gap-[10px]">
@@ -105,12 +105,17 @@ function ContactPreview() {
           <CopyButton value={EMAIL} />
         </div>
 
-        <div className={`${CARD} opacity-55`}>
-          <div className={MAIN}>
+        <div className={CARD}>
+          <a
+            href={LINKEDIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${MAIN} hover:opacity-80`}
+          >
             <Badge glyph="linkedin-logo" bg="#0A66C2" fg="#ffffff" />
-            <Texts label="LinkedIn" sub={t("contact.soon")} />
-          </div>
-          <CopyButton />
+            <Texts label="LinkedIn" sub="adib-amrani" />
+          </a>
+          <CopyButton value={LINKEDIN_URL} />
         </div>
 
         <div className={CARD}>

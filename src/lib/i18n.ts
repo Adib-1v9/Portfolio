@@ -103,6 +103,7 @@ const dictionary = {
     "apropos.intro":
       "Salut, moi c'est Adib, étudiant en informatique à Montpellier. La création m'a toujours animé, qu'il s'agisse d'apprendre ou de développer une appli dont j'ai eu l'idée. Vous trouverez ici la plupart de mes projets. N'hésitez pas à explorer le bureau, il s'y cache peut-être quelques surprises.",
     "cv.intro": "Mon parcours et mes expériences.",
+    "cv.download": "Télécharger le CV",
     "window.projects": "Projets",
     "finder.categories": "Catégories",
     "finder.cat.all": "Tout",
@@ -167,6 +168,7 @@ const dictionary = {
     "apropos.intro":
       "Hi, I'm Adib, a computer science student in Montpellier. Making things has always driven me, whether that means learning something new or building an app I had in mind. You'll find most of my projects here. Feel free to explore the desktop, a few surprises may be hiding around.",
     "cv.intro": "My background and experience.",
+    "cv.download": "Download CV",
     "window.projects": "Projects",
     "finder.categories": "Categories",
     "finder.cat.all": "All",
@@ -231,6 +233,7 @@ const dictionary = {
     "apropos.intro":
       "Hola, soy Adib, estudiante de informática en Montpellier. Crear siempre me ha movido, ya sea aprender algo nuevo o desarrollar una app que tenía en mente. Aquí encontrarás la mayoría de mis proyectos. No dudes en explorar el escritorio, puede que se escondan algunas sorpresas.",
     "cv.intro": "Mi trayectoria y mi experiencia.",
+    "cv.download": "Descargar CV",
     "window.projects": "Proyectos",
     "finder.categories": "Categorías",
     "finder.cat.all": "Todo",
@@ -295,6 +298,7 @@ const dictionary = {
     "apropos.intro":
       "Hallo, ich bin Adib, Informatikstudent in Montpellier. Etwas zu erschaffen hat mich schon immer angetrieben, sei es Neues zu lernen oder eine App umzusetzen, die mir im Kopf herumging. Hier finden Sie die meisten meiner Projekte. Erkunden Sie ruhig den Desktop, vielleicht verstecken sich ein paar Überraschungen.",
     "cv.intro": "Mein Werdegang und meine Erfahrung.",
+    "cv.download": "Lebenslauf herunterladen",
     "window.projects": "Projekte",
     "finder.categories": "Kategorien",
     "finder.cat.all": "Alle",
@@ -359,6 +363,7 @@ const dictionary = {
     "apropos.intro":
       "مرحبًا، أنا أديب، طالب علوم حاسوب في مونبلييه. الإبداع كان دائمًا ما يحركني، سواء لتعلّم شيء جديد أو لتطوير تطبيق راود ذهني. تجدون هنا معظم مشاريعي. لا تترددوا في استكشاف سطح المكتب، فقد تختبئ فيه بعض المفاجآت.",
     "cv.intro": "مساري وخبراتي.",
+    "cv.download": "تنزيل السيرة الذاتية",
     "window.projects": "المشاريع",
     "finder.categories": "الفئات",
     "finder.cat.all": "الكل",
@@ -423,6 +428,7 @@ const dictionary = {
     "apropos.intro":
       "こんにちは、Adibと申します。モンペリエで情報学を学んでいる学生です。何かを作ることに常に心を動かされてきました。新しいことを学ぶためでも、頭の中にあったアプリを形にするためでも。ここでは私のプロジェクトのほとんどをご覧いただけます。デスクトップもぜひ探索してみてください。ちょっとした驚きが隠れているかもしれません。",
     "cv.intro": "これまでの経歴と経験。",
+    "cv.download": "履歴書をダウンロード",
     "window.projects": "プロジェクト",
     "finder.categories": "カテゴリ",
     "finder.cat.all": "すべて",
@@ -487,6 +493,7 @@ const dictionary = {
     "apropos.intro":
       "안녕하세요, Adib입니다. 몽펠리에에서 컴퓨터공학을 공부하고 있는 학생입니다. 무언가를 만드는 일이 늘 저를 움직여 왔습니다. 새로운 것을 배우기 위해서든, 머릿속에 있던 앱을 직접 만들어 보기 위해서든요. 여기에서 제 프로젝트 대부분을 보실 수 있습니다. 데스크톱도 한번 둘러보세요. 작은 깜짝 요소들이 숨어 있을지도 모릅니다.",
     "cv.intro": "저의 이력과 경험.",
+    "cv.download": "이력서 다운로드",
     "window.projects": "프로젝트",
     "finder.categories": "카테고리",
     "finder.cat.all": "전체",

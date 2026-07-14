@@ -23,8 +23,8 @@ export function AppShell({
   techKey,
   tech = false,
   shots,
-  reservePreview = false,
   preview,
+  action,
 }: {
   icon: GlyphKey;
   color: string;
@@ -36,8 +36,8 @@ export function AppShell({
   techKey?: MessageKey; // texte « détails techniques » ; défaut = app.techSoon tant que vide
   tech?: boolean; // true (projets) = bouton qui bascule description ↔ détails techniques
   shots?: string[]; // captures du projet : carrousel si fournies, sinon surface placeholder
-  reservePreview?: boolean; // true = garde le split + panneau placeholder même sans capture (CV)
-  preview?: ReactNode; // contenu custom du panneau droit (ex. liens cliquables de Contact)
+  preview?: ReactNode; // contenu custom du panneau droit (ex. liens Contact, aperçu PDF du CV)
+  action?: ReactNode; // bouton d'action sous le récit (ex. télécharger le CV)
 }) {
   const { t } = useI18n();
   // Bascule du TEXTE de gauche : description (défaut) ↔ détails techniques. La preview ne bouge pas.
@@ -45,8 +45,8 @@ export function AppShell({
   const hasShots = !!shots && shots.length > 0;
   // Rien à montrer à droite (projet sans capture : bots/mod ; ou app système À propos) → on centre
   // le récit plein cadre plutôt qu'un panneau vide. On garde le split si : captures (carrousel),
-  // contenu custom (`preview`, ex. liens Contact), ou panneau réservé (CV).
-  const centered = !hasShots && !reservePreview && !preview;
+  // contenu custom (`preview`, ex. liens Contact ou aperçu PDF du CV).
+  const centered = !hasShots && !preview;
 
   const story = showTech ? t(techKey ?? "app.techSoon") : t(descKey ?? "app.placeholder");
   const techButton = tech && (
@@ -79,6 +79,7 @@ export function AppShell({
         )}
         <p className="max-w-[56ch] text-[16.5px] leading-[1.7] text-[#aab2c3]">{story}</p>
         {techButton && <div className="mt-6">{techButton}</div>}
+        {action && <div className="mt-6">{action}</div>}
       </div>
     );
   }
@@ -108,6 +109,7 @@ export function AppShell({
           {story}
         </p>
         {techButton && <div className="mt-5">{techButton}</div>}
+        {action && <div className="mt-5">{action}</div>}
       </div>
 
       <div className="min-w-0 flex-1 p-[18px]">
