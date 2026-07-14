@@ -1,24 +1,34 @@
 "use client";
 
-// Fenêtre CV : à gauche le récit + un bouton « télécharger » ; à droite un aperçu du PDF rendu
-// par le viewer natif du navigateur (iframe). Le PDF vit dans public/ → servi tel quel, sans
-// dépendance de rendu. `#toolbar=0` masque la barre d'outils du viewer pour un rendu intégré
-// (paramètre du plugin PDF, ignoré silencieusement s'il n'est pas supporté).
+// Fenêtre CV : à gauche le récit + un bouton « télécharger » ; à droite un aperçu de la page
+// rasterisée (WebP dans public/, générée hors ligne depuis le PDF — même parti-pris que les
+// captures projet). L'aperçu vit dans un conteneur DOM qu'on maîtrise → scrollbar dans le thème
+// (`themed-scroll`), contrairement au viewer PDF natif d'un <iframe> dont la barre n'est pas
+// stylable. Le bouton « télécharger » sert le vrai PDF (texte sélectionnable, à jour).
+import Image from "next/image";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { ProjectGlyph } from "@/components/desktop/ProjectGlyph";
 import { findApp } from "@/lib/apps";
 import { AppShell } from "./AppShell";
 
 const CV_URL = "/CV_Adib_Amrani.pdf";
+const CV_PREVIEW = "/CV_Adib_Amrani.webp";
+// Dimensions natives du WebP → ratio conservé par next/image (h-auto w-full).
+const CV_PREVIEW_W = 1655;
+const CV_PREVIEW_H = 2341;
 
 function CVPreview() {
   const { t } = useI18n();
   return (
-    <div className="h-full w-full overflow-hidden rounded-[12px] border border-white/[0.08] bg-[#0d0f15]">
-      <iframe
-        src={`${CV_URL}#toolbar=0&view=FitH`}
-        title={t("app.cv")}
-        className="h-full w-full border-0"
+    <div className="themed-scroll h-full w-full overflow-y-auto rounded-[12px] border border-white/[0.08] bg-[#0d0f15] p-[14px]">
+      <Image
+        src={CV_PREVIEW}
+        alt={t("app.cv")}
+        width={CV_PREVIEW_W}
+        height={CV_PREVIEW_H}
+        // WebP déjà finalisée → servie telle quelle, sans la recompression Next (qualité 75).
+        unoptimized
+        className="h-auto w-full rounded-[8px] shadow-[0_20px_50px_-20px_rgba(0,0,0,.8)]"
       />
     </div>
   );

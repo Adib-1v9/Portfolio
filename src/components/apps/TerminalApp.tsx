@@ -120,7 +120,7 @@ export function TerminalApp() {
 
   return (
     <div
-      className="terminal-scroll h-full w-full overflow-auto p-4 font-mono text-[15px] leading-[1.5]"
+      className="themed-scroll h-full w-full overflow-auto p-4 font-mono text-[15px] leading-[1.5]"
       style={{ backgroundColor: "#16181E" }}
       onClick={() => {
         // Clic simple (hors sélection de texte) = refocus l'input.
